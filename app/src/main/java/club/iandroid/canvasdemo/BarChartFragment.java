@@ -15,6 +15,8 @@ import java.util.List;
 
 import club.iandroid.sevenchartslib.BarChart;
 import club.iandroid.sevenchartslib.ComboChart;
+import club.iandroid.sevenchartslib.entity.BarEntity;
+import club.iandroid.sevenchartslib.entity.DataSet;
 import club.iandroid.sevenchartslib.entity.LineEntity;
 import club.iandroid.sevenchartslib.utils.LogUtils;
 import club.iandroid.sevenchartslib.YRender;
@@ -29,7 +31,9 @@ public class BarChartFragment extends Fragment {
     private EditText et_index;
     private Button btn_go;
     private List<String> xLables = new ArrayList<>();
-    private List<LineEntity> lineEntities = new ArrayList<>();
+    private List<LineEntity> lineEntitiesExpedient = new ArrayList<>();
+    private List<LineEntity> lineEntitiesIncome = new ArrayList<>();
+    private List<BarEntity> barEntities = new ArrayList<>();
 
     @Nullable
     @Override
@@ -56,18 +60,52 @@ public class BarChartFragment extends Fragment {
         for (int i = 0; i < 10; i++) {
             String label = "label-" + i;
             xLables.add(label);
-            lineEntities.add(new LineEntity((float) Math.random() * 800 * (i + 1), label));
+            float randIndex = (float) i * 0.6f;
+
+            LineEntity lineEntityIncome = new LineEntity((float) Math.random() * 600 * randIndex, label);
+            LineEntity lineEntityExpedient = new LineEntity((float) Math.random() * 500 * randIndex, label);
+
+            if (i > 6) {
+                lineEntityIncome.setDrawDash(true);
+                lineEntityExpedient.setDrawDash(true);
+            }
+
+            lineEntitiesIncome.add(lineEntityIncome);
+            lineEntitiesExpedient.add(lineEntityExpedient);
+
+            if (i > 4 && i < 7) {
+                barEntities.add(new BarEntity((float) Math.random() * -600 * randIndex, label));
+            } else {
+                BarEntity barEntity = new BarEntity((float) Math.random() * 600 * randIndex, label);
+                if (i > 6) {
+                    barEntity.setDrawDash(true);
+                }
+                barEntities.add(barEntity);
+            }
         }
-        mBarChart.getBaseBarChart().setxLableValues(xLables);
-        mBarChart.getBaseBarChart().setLineValues(lineEntities);
-        mBarChart.getBaseBarChart().setmColor(Color.parseColor("#19BAA9"));
+
+        List<DataSet> dataSets = new ArrayList<>();
+
+        DataSet dataSetIncome = new DataSet();
+        dataSetIncome.setDataSet(lineEntitiesIncome);
+        dataSetIncome.setmColor(Color.parseColor("#19BAA9"));
+
+        DataSet dataSetExpedient = new DataSet();
+        dataSetExpedient.setDataSet(lineEntitiesExpedient);
+        dataSetExpedient.setmColor(Color.parseColor("#FF9C38"));
+
+        dataSets.add(dataSetIncome);
+        dataSets.add(dataSetExpedient);
+
+        mBarChart.getBaseBarChart().setBarEntities(barEntities);
+        mBarChart.getBaseBarChart().setDataSets(dataSets);
     }
 
 
     @Override
     public void onResume() {
         super.onResume();
-        if(isVisible()) {
+        if (isVisible()) {
             mBarChart.getBaseBarChart().animShow(2);
         }
     }

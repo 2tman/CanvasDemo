@@ -17,6 +17,7 @@ import android.view.animation.Transformation;
 
 import java.util.List;
 
+import club.iandroid.sevenchartslib.entity.BarEntity;
 import club.iandroid.sevenchartslib.utils.Utils;
 
 /**
@@ -34,17 +35,13 @@ public class BaseBarChart extends View {
     private Paint xLabelPaint;
     // 矩形画笔 柱状图的样式信息
     private Paint paint;
-    // 7条，显示各个柱状的数据
-    private int[] progress;
+    // 显示各个柱状的数据
+    private List<BarEntity> barEntities;
     // 实现动画的值
-    private int[] aniProgress;
+    private float[] aniProgress;
     // 在柱状图上显示数字
-    private final int TRUE = 1;
-    // 设置点击事件，显示哪一条柱状的信息
-    private int[] text;
+    private final boolean mDrawTextAtTop = true;
 
-    // 坐标轴底部的Label文字
-    private List<String> xLableValues;
     // 是否使用动画
     private int flag;
     //每屏幕显示的最多的lable数量 奇数
@@ -63,8 +60,9 @@ public class BaseBarChart extends View {
     private int xRightOffset = 10;
     //x轴居中位置的中心点初始位置
     private int xMiddleOffset;
+    private int mColor;
 
-    private HistogramAnimation ani;
+    protected HistogramAnimation barAnimation;
 
     public BaseBarChart(Context context) {
         super(context);
@@ -82,19 +80,10 @@ public class BaseBarChart extends View {
     }
 
     private void init(Context context) {
+        mColor = Color.parseColor("#73A3EB");
 
-
-        text = new int[10];
-        aniProgress = new int[10];
-        progress = new int[10];
-
-        for (int i = 0; i < 10; i++) {
-            text[i] = 1;
-            aniProgress[i] = 0;
-            progress[i] = 500 * (i + 1);
-        }
-        ani = new HistogramAnimation();
-        ani.setDuration(2000);
+        barAnimation = new HistogramAnimation();
+        barAnimation.setDuration(1000);
 
         xLinePaint = new Paint();
         hLinePaint = new Paint();
@@ -108,8 +97,9 @@ public class BaseBarChart extends View {
 
     }
 
-    public void setxLableValues(List<String> xLableValues) {
-        this.xLableValues = xLableValues;
+    public void setBarEntities(List<BarEntity> barEntities) {
+        this.barEntities = barEntities;
+        aniProgress = new float[barEntities.size()];
     }
 
     public void setyRender(YRender yRender) {
@@ -127,7 +117,7 @@ public class BaseBarChart extends View {
 
     public void start(int flag) {
         this.flag = flag;
-        this.startAnimation(ani);
+//        this.startAnimation(barAnimation);
     }
 
     @Override
@@ -163,9 +153,9 @@ public class BaseBarChart extends View {
         // 绘制矩形柱状图
         drawRectBar(canvas, barStep, bottom, bottom);
 
-        if (xLableValues != null && xLableValues.size() > 0) {
+        if (barEntities != null && barEntities.size() > 0) {
             // 设置底部的文字
-            int columCount = xLableValues.size();
+            int columCount = barEntities.size();
             drawXLables(canvas, barStep, height, columCount);
         }
     }
@@ -241,8 +231,7 @@ public class BaseBarChart extends View {
         for (int i = 0; i < columCount; i++) {
             int left = Utils.dp2px(xLeftLineOffset) + step * i + barMargin * i + (step / 2) + getxLeftOffset();
 
-            canvas.drawText(xLableValues.get(i), left, height
-                    + Utils.dp2px(xLabelHeight), xLabelPaint);
+            canvas.drawText(barEntities.get(i).getmLabel(), left, height, xLabelPaint);
         }
     }
 
@@ -252,31 +241,32 @@ public class BaseBarChart extends View {
     private void drawRectBar(Canvas canvas, int step, int zeroHeight, int bottom) {
         if (aniProgress != null && aniProgress.length > 0) {
             for (int i = 0; i < aniProgress.length; i++) {// 循环遍历将7条柱状图形画出来
-                int value = aniProgress[i];
+                float value = aniProgress[i];
                 paint.setAntiAlias(true);// 抗锯齿效果
                 paint.setStyle(Paint.Style.FILL);
                 paint.setTextSize(Utils.sp2px(9));// 字体大小
-                paint.setColor(Color.parseColor("#6DCAEC"));
+                paint.setColor(mColor);
 
                 Rect rect = new Rect();// 柱状图的形状
 
                 rect.left = Utils.dp2px(xLeftLineOffset) + getxLeftOffset() + step * i + barMargin * i;
                 rect.right = Utils.dp2px(xLeftLineOffset) + getxLeftOffset() + step * (i + 1) + barMargin * i;
                 if (yRender.getvPerValue() != 0) {
-                    int rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
-                    rect.top = rh;
+                    float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
+
+                    rect.top = Math.round(rh);
                     rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
 
                     canvas.drawRect(rect, paint);
 
-                    // 是否显示柱状图上方的数字
-                    if (this.text[i] == TRUE) {
-
+                    // 显示柱状图上方的数字
+                    if(mDrawTextAtTop) {
                         int left = Utils.dp2px(xLeftLineOffset) + step * i + barMargin * i + step / 2;
 
                         canvas.drawText(value + "", left, rh - Utils.dp2px(30)
                                 + Utils.dp2px(xLabelHeight), paint);
                     }
+
                 }
             }
         }
@@ -326,8 +316,8 @@ public class BaseBarChart extends View {
      * @return
      */
     public int getScreenCount() {
-        int count = xLableValues.size() / showLableCount;
-        if (xLableValues.size() % showLableCount != 0) {
+        int count = barEntities.size() / showLableCount;
+        if (barEntities.size() % showLableCount != 0) {
             count++;
         }
         return count;
@@ -410,12 +400,12 @@ public class BaseBarChart extends View {
                                            Transformation t) {
             super.applyTransformation(interpolatedTime, t);
             if (interpolatedTime < 1.0f && flag == 2) {
-                for (int i = 0; i < aniProgress.length; i++) {
-                    aniProgress[i] = (int) (progress[i] * interpolatedTime);
+                for (int i = 0; i < barEntities.size(); i++) {
+                    aniProgress[i] = (barEntities.get(i).getmValue() * interpolatedTime);
                 }
             } else {
-                for (int i = 0; i < aniProgress.length; i++) {
-                    aniProgress[i] = progress[i];
+                for (int i = 0; i < barEntities.size(); i++) {
+                    aniProgress[i] = barEntities.get(i).getmValue();
                 }
             }
             invalidate();
@@ -444,9 +434,9 @@ public class BaseBarChart extends View {
      */
     public int findFinalXByXValue(String xValue) {
         int targetIndex = 0;
-        if (xLableValues != null && xLableValues.size() > 0) {
-            for (int i = 0; i < xLableValues.size(); i++) {
-                if (xLableValues.get(i).equals(xValue)) {
+        if (barEntities != null && barEntities.size() > 0) {
+            for (int i = 0; i < barEntities.size(); i++) {
+                if (barEntities.get(i).getmLabel().equals(xValue)) {
                     targetIndex = i;
                     break;
                 }
@@ -465,14 +455,15 @@ public class BaseBarChart extends View {
      */
     public int findFinalPointXByXValue(String xValue) {
         int targetIndex = 0;
-        if (xLableValues != null && xLableValues.size() > 0) {
-            for (int i = 0; i < xLableValues.size(); i++) {
-                if (xLableValues.get(i).equals(xValue)) {
+        if (barEntities != null && barEntities.size() > 0) {
+            for (int i = 0; i < barEntities.size(); i++) {
+                if (barEntities.get(i).getmLabel().equals(xValue)) {
                     targetIndex = i;
                     break;
                 }
             }
         }
+        targetIndex++;
         //计算targetIndex的x轴位置
         int targetBarX = getBarWidth() * targetIndex + getBarMargin() * targetIndex + getxLeftOffset() + getBarWidth() / 2;
         return targetBarX;
