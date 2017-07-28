@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
@@ -57,30 +58,32 @@ public class BarLineChart extends BaseBarChart {
         mLinePaint.setStyle(Paint.Style.STROKE);
         mLinePaint.setStrokeWidth(Utils.dp2px(1));
 
-        mLinePaintDash = new Paint();
+        mLinePaintDash = new Paint(Paint.ANTI_ALIAS_FLAG);
         mLinePaintDash.setAntiAlias(true);
         mLinePaintDash.setStyle(Paint.Style.STROKE);
         mLinePaintDash.setStrokeWidth(Utils.dp2px(1));
         mLinePaintDash.setPathEffect(new DashPathEffect(new float[]{
-                8f, 10f, 8f, 10f
+                5f, 5f
         }, 0f));
 
         mPointPaint = new Paint();
         mPointPaint.setAntiAlias(true);
 
         animationSet = new AnimationSet(true);
-
+        pathLine = new Path();
 
     }
-
+    private Path pathLine;
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+//        setLayerType(LAYER_TYPE_SOFTWARE, null);
         animationSet.addAnimation(barAnimation);
         drawLines(canvas);
     }
 
     private void drawLines(Canvas canvas) {
+        pathLine.reset();
         if (dataSets != null && dataSets.size() > 0) {
             for (int k = 0; k < dataSets.size(); k++) {
                 List<LineEntity> mLineValues = dataSets.get(k).getDataSet();
@@ -110,8 +113,12 @@ public class BarLineChart extends BaseBarChart {
 //                                findFinalYByValue(lineEntityEnd.getmValue());
 
                         //判断是否需要画虚线
-                        if (lineEntityStart.isDrawDash()) {
-                            canvas.drawLine(entityX, entityY, entityXEnd, entityYEnd, mLinePaintDash);
+                        if (lineEntityEnd.isDrawDash()) {
+
+                            pathLine.moveTo(entityX, entityY);
+                            pathLine.lineTo(entityXEnd, entityYEnd);
+                            canvas.drawPath(pathLine, mLinePaintDash);
+//                            canvas.drawLine(entityX, entityY, entityXEnd, entityYEnd, mLinePaintDash);
                         } else {
                             canvas.drawLine(entityX, entityY, entityXEnd, entityYEnd, mLinePaint);
                         }
