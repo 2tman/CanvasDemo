@@ -3,6 +3,7 @@ package club.iandroid.canvasdemo;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.Fragment;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -80,22 +81,28 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        if (id == R.id.nav_bar) {//柱状图
+            replactFragment(new BarChartFragment());
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_line) {//线形图
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_pie) {//饼图
 
-        } else if (id == R.id.nav_share) {
+        } else if (id == R.id.nav_bar_line) {//柱状图+线形图
 
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_bar_bar) {//复合柱状图
 
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    private void replactFragment(Fragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.content_fragment, fragment)
+                .commitAllowingStateLoss();
     }
 }

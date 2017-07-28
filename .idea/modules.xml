@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/CanvasDemo.iml" filepath="$PROJECT_DIR$/CanvasDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sevenchartslib/sevenchartslib.iml" filepath="$PROJECT_DIR$/sevenchartslib/sevenchartslib.iml" />
     </modules>
   </component>
 </project>
