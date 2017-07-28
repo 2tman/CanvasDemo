@@ -100,7 +100,7 @@ public class YRender extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        int height = getHeight() - Utils.dp2px(20);//减去x坐标文字高度
+        int height = getHeight() - Utils.dp2px(50);//减去x坐标文字高度
 
         hPerHeight = height / showLableCount-1;// 分成四部分
 

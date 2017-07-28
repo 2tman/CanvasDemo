@@ -35,6 +35,9 @@ public class BaseBarChart extends View {
     private Paint xLabelPaint;
     // 矩形画笔 柱状图的样式信息
     private Paint paint;
+    private Paint mRenderPaintDash;
+    private Paint mBarBorderPaint;
+
     // 显示各个柱状的数据
     private List<BarEntity> barEntities;
     // 实现动画的值
@@ -53,7 +56,7 @@ public class BaseBarChart extends View {
     //bar的间距
     private int barMargin = 0;
     //x轴文本的高度
-    private int xLabelHeight = 20;
+    private int xLabelHeight = 50;
     //x轴柱状图左侧的偏移
     private int xLeftOffset = 10;
     //x轴柱状图右侧的偏移
@@ -85,10 +88,17 @@ public class BaseBarChart extends View {
         barAnimation = new HistogramAnimation();
         barAnimation.setDuration(1000);
 
-        xLinePaint = new Paint();
-        hLinePaint = new Paint();
-        xLabelPaint = new Paint();
-        paint = new Paint();
+        xLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        hLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        xLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mRenderPaintDash = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mRenderPaintDash.setStyle(Paint.Style.FILL);
+
+        mBarBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        mBarBorderPaint.setStyle(Paint.Style.STROKE);
 
         // 给画笔设置颜色
         xLinePaint.setColor(Color.DKGRAY);
@@ -213,7 +223,6 @@ public class BaseBarChart extends View {
         xLabelPaint.setTextSize(Utils.sp2px(10));
         xLabelPaint.setAntiAlias(true);
         xLabelPaint.setStyle(Paint.Style.FILL);
-
         for (int i = 0; i < columCount; i++) {
             int left = Utils.dp2px(xLeftLineOffset) + step * i + barMargin * i + (step / 2) + getxLeftOffset();
 
@@ -226,45 +235,152 @@ public class BaseBarChart extends View {
      */
     private void drawRectBar(Canvas canvas, int step, int zeroHeight, int bottom) {
         if (aniProgress != null && aniProgress.length > 0) {
-            for (int i = 0; i < aniProgress.length; i++) {// 循环遍历将7条柱状图形画出来
+            for (int i = 0; i < barEntities.size(); i++) {// 循环遍历将7条柱状图形画出来
                 float value = aniProgress[i];
                 paint.setAntiAlias(true);// 抗锯齿效果
                 paint.setStyle(Paint.Style.FILL);
                 paint.setTextSize(Utils.sp2px(9));// 字体大小
-                paint.setColor(mColor);
 
+                mBarBorderPaint.setColor(mColor);
+                mBarBorderPaint.setStrokeWidth(Utils.dp2px(1));
                 Rect rect = new Rect();// 柱状图的形状
 
                 rect.left = Utils.dp2px(xLeftLineOffset) + getxLeftOffset() + step * i + barMargin * i;
                 rect.right = Utils.dp2px(xLeftLineOffset) + getxLeftOffset() + step * (i + 1) + barMargin * i;
                 if (yRender.getvPerValue() != 0) {
-                    if (value >= 0) {//大于0
-                        float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
-
-                        rect.top = Math.round(rh);
-                        rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
-
-                        canvas.drawRect(rect, paint);
-                        // 显示柱状图上方的数字
-                        if (mDrawTextAtTop) {
-                            int left = Utils.dp2px(xLeftLineOffset) + step * i + barMargin * i + step / 2;
-
-                            canvas.drawText(value + "", left, rh - Utils.dp2px(30)
-                                    + Utils.dp2px(xLabelHeight), paint);
-                        }
-                    } else if (value < 0) {
-                        float rbottom = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
-
-                        rect.top = bottom + Utils.dp2px(yRender.getyLineOffset());
-                        rect.bottom = Math.round(rbottom);
-
-                        canvas.drawRect(rect, paint);
+                    //画虚体矩形
+                    if(barEntities.get(i).isDrawDash()){
+                        drawDashBarRect(canvas, rect, i, step, bottom, value);
+                    }else {
+                        paint.setColor(mColor);
+                        //实体矩形
+                        drawFillBarRect(canvas, rect, i, step, bottom, value);
                     }
-
 
                 }
             }
         }
+    }
+    /**
+     * 画虚体柱状图
+     * @param canvas
+     * @param rect
+     * @param index
+     * @param step
+     * @param bottom
+     * @param value
+     */
+    private void drawDashBarRect(Canvas canvas, Rect rect, int index, int step, int bottom, float value){
+        if (value >= 0) {//大于0
+            float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
+
+            rect.top = Math.round(rh);
+            rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
+
+            //北京白色矩形
+            paint.setColor(Color.WHITE);
+            canvas.drawRect(rect, paint);
+
+            mRenderPaintDash.setColor(mColor);
+
+            float startX = rect.left;
+            float startY = rect.top;
+            float stopX = rect.right;
+
+            /**
+             * 右上角
+             */
+            float rightStartX = stopX - 10;
+            float rightStartY = startY + 10;
+            while (rightStartX > startX) {
+                canvas.drawLine(rightStartX, startY, stopX, rightStartY, mRenderPaintDash);
+                rightStartX -= 10;
+                rightStartY += 10;
+            }
+
+            /**
+             * 中间
+             */
+            float endY = rightStartY;
+            startY += 10 / 2;
+
+            float middelStartY = startY;
+            while (endY < rect.bottom) {
+                canvas.drawLine(startX, middelStartY, stopX, endY, mRenderPaintDash);
+                middelStartY += 10;
+                endY += 10;
+            }
+
+            /**
+             * 左下角
+             */
+            float leftStartX = startX;
+            float leftStartY = middelStartY;
+            float leftStopX = rect.right -10/2;
+
+            while (leftStartY < rect.bottom) {
+                canvas.drawLine(leftStartX, leftStartY, leftStopX, rect.bottom, mRenderPaintDash);
+                leftStartY += 10;
+                leftStopX-=10;
+            }
+
+            // 显示柱状图上方的数字
+            if (mDrawTextAtTop) {
+                int left = Utils.dp2px(xLeftLineOffset) + step * index + barMargin * index + step / 2;
+
+                canvas.drawText(value + "", left, rh - Utils.dp2px(30)
+                        + Utils.dp2px(xLabelHeight), paint);
+            }
+        } else if (value < 0) {
+            float rbottom = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
+
+            rect.top = bottom + Utils.dp2px(yRender.getyLineOffset());
+            rect.bottom = Math.round(rbottom);
+
+            canvas.drawRect(rect, paint);
+
+        }
+
+        canvas.drawRect(rect.left, rect.top, rect.right,
+                rect.bottom, mBarBorderPaint);
+
+
+    }
+
+    /**
+     * 画实体柱状图
+     * @param canvas
+     * @param rect
+     * @param index
+     * @param step
+     * @param bottom
+     * @param value
+     */
+    private void drawFillBarRect(Canvas canvas, Rect rect, int index, int step, int bottom, float value){
+        if (value >= 0) {//大于0
+            float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
+
+            rect.top = Math.round(rh);
+            rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
+
+            canvas.drawRect(rect, paint);
+            // 显示柱状图上方的数字
+            if (mDrawTextAtTop) {
+                int left = Utils.dp2px(xLeftLineOffset) + step * index + barMargin * index + step / 2;
+
+                canvas.drawText(value + "", left, rh - Utils.dp2px(30)
+                        + Utils.dp2px(xLabelHeight), paint);
+            }
+        } else if (value < 0) {
+            float rbottom = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
+
+            rect.top = bottom + Utils.dp2px(yRender.getyLineOffset());
+            rect.bottom = Math.round(rbottom);
+
+            canvas.drawRect(rect, paint);
+        }
+        canvas.drawRect(rect.left, rect.top, rect.right,
+                rect.bottom, mBarBorderPaint);
     }
 
     /**
