@@ -83,7 +83,7 @@ public class BarLineChart extends BaseBarChart {
     }
 
     private void drawLines(Canvas canvas) {
-        pathLine.reset();
+
         if (dataSets != null && dataSets.size() > 0) {
             for (int k = 0; k < dataSets.size(); k++) {
                 List<LineEntity> mLineValues = dataSets.get(k).getDataSet();
@@ -93,7 +93,7 @@ public class BarLineChart extends BaseBarChart {
                 mPointPaint.setColor(mColor);
                 mLinePaint.setColor(mColor);
                 mLinePaintDash.setColor(mColor);
-
+                pathLine.reset();
                 for (int i = 0; i < mLineValues.size(); i++) {
                     LineEntity lineEntityStart = mLineValues.get(i);
 

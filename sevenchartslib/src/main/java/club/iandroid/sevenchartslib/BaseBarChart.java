@@ -131,8 +131,6 @@ public class BaseBarChart extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        //柱状图面板实际宽度
-
         //柱状图面板实际高度
         int height = getFactHeight();
         //y轴间隔高度
@@ -179,10 +177,6 @@ public class BaseBarChart extends View {
         return getHeight() - Utils.dp2px(xLabelHeight);
     }
 
-    public int getxMiddleOffset() {
-        int middleIndex = showLableCount - 2;
-        return xMiddleOffset;
-    }
 
     /**
      * 绘制Y轴线条
@@ -193,14 +187,6 @@ public class BaseBarChart extends View {
             canvas.drawLine(Utils.dp2px(xLeftLineOffset), i * hPerHeight + Utils.dp2px(yRender.getyLineOffset()),
                     width, i * hPerHeight + Utils.dp2px(yRender.getyLineOffset()), hLinePaint);
         }
-    }
-
-    private boolean isOutOfBounds(int stopX) {
-        int maxX = getScreenWidth() - Utils.dp2px(xLeftLineOffset);
-        if (stopX > maxX) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -252,20 +238,29 @@ public class BaseBarChart extends View {
                 rect.left = Utils.dp2px(xLeftLineOffset) + getxLeftOffset() + step * i + barMargin * i;
                 rect.right = Utils.dp2px(xLeftLineOffset) + getxLeftOffset() + step * (i + 1) + barMargin * i;
                 if (yRender.getvPerValue() != 0) {
-                    float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
+                    if (value >= 0) {//大于0
+                        float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
 
-                    rect.top = Math.round(rh);
-                    rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
+                        rect.top = Math.round(rh);
+                        rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
 
-                    canvas.drawRect(rect, paint);
+                        canvas.drawRect(rect, paint);
+                        // 显示柱状图上方的数字
+                        if (mDrawTextAtTop) {
+                            int left = Utils.dp2px(xLeftLineOffset) + step * i + barMargin * i + step / 2;
 
-                    // 显示柱状图上方的数字
-                    if(mDrawTextAtTop) {
-                        int left = Utils.dp2px(xLeftLineOffset) + step * i + barMargin * i + step / 2;
+                            canvas.drawText(value + "", left, rh - Utils.dp2px(30)
+                                    + Utils.dp2px(xLabelHeight), paint);
+                        }
+                    } else if (value < 0) {
+                        float rbottom = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
 
-                        canvas.drawText(value + "", left, rh - Utils.dp2px(30)
-                                + Utils.dp2px(xLabelHeight), paint);
+                        rect.top = bottom + Utils.dp2px(yRender.getyLineOffset());
+                        rect.bottom = Math.round(rbottom);
+
+                        canvas.drawRect(rect, paint);
                     }
+
 
                 }
             }
