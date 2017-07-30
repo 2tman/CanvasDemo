@@ -151,16 +151,14 @@ public class BarLineChart extends BaseBarChart {
         }
     }
 
-    // 是否使用动画
-    private int flag;
+
     private LinkedList<float[]> animProgress;
 
     public void animShow(int flag) {
         this.flag = flag;
-        start(flag);
-//
         animationSet.setDuration(1000);
         startAnimation(animationSet);
+
     }
 
     /**

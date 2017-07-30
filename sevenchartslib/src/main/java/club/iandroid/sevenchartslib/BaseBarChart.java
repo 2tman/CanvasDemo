@@ -34,7 +34,7 @@ public class BaseBarChart extends View {
     // 绘制X轴文本的画笔
     private Paint xLabelPaint;
     // 矩形画笔 柱状图的样式信息
-    private Paint paint;
+    private Paint topTextPaint;
     private Paint mRenderPaintDash;
     private Paint mBarBorderPaint;
 
@@ -46,7 +46,7 @@ public class BaseBarChart extends View {
     private final boolean mDrawTextAtTop = true;
 
     // 是否使用动画
-    private int flag;
+    protected int flag;
     //每屏幕显示的最多的lable数量 奇数
     private int showLableCount = 5;
     //线条左侧偏移
@@ -93,7 +93,9 @@ public class BaseBarChart extends View {
         xLabelPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 
 
-        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        topTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        topTextPaint.setTextAlign(Align.CENTER);
+
         mRenderPaintDash = new Paint(Paint.ANTI_ALIAS_FLAG);
         mRenderPaintDash.setStyle(Paint.Style.FILL);
 
@@ -112,6 +114,10 @@ public class BaseBarChart extends View {
         aniProgress = new float[barEntities.size()];
     }
 
+    public List<BarEntity> getBarEntities() {
+        return barEntities;
+    }
+
     public void setyRender(YRender yRender) {
         this.yRender = yRender;
     }
@@ -125,11 +131,6 @@ public class BaseBarChart extends View {
     }
 
 
-    public void start(int flag) {
-        this.flag = flag;
-//        this.startAnimation(barAnimation);
-    }
-
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int measuredHeight = MeasureSpec.getSize(heightMeasureSpec);
@@ -141,6 +142,8 @@ public class BaseBarChart extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        canvas.save();
+
         //柱状图面板实际高度
         int height = getFactHeight();
         //y轴间隔高度
@@ -166,6 +169,7 @@ public class BaseBarChart extends View {
             int columCount = barEntities.size();
             drawXLables(canvas, barStep, height, columCount);
         }
+        canvas.restore();
     }
 
     /**
@@ -237,9 +241,9 @@ public class BaseBarChart extends View {
         if (aniProgress != null && aniProgress.length > 0) {
             for (int i = 0; i < barEntities.size(); i++) {// 循环遍历将7条柱状图形画出来
                 float value = aniProgress[i];
-                paint.setAntiAlias(true);// 抗锯齿效果
-                paint.setStyle(Paint.Style.FILL);
-                paint.setTextSize(Utils.sp2px(9));// 字体大小
+                topTextPaint.setAntiAlias(true);// 抗锯齿效果
+                topTextPaint.setStyle(Paint.Style.FILL);
+                topTextPaint.setTextSize(Utils.sp2px(9));// 字体大小
 
                 mBarBorderPaint.setColor(mColor);
                 mBarBorderPaint.setStrokeWidth(Utils.dp2px(1));
@@ -249,10 +253,10 @@ public class BaseBarChart extends View {
                 rect.right = Utils.dp2px(xLeftLineOffset) + getxLeftOffset() + step * (i + 1) + barMargin * i;
                 if (yRender.getvPerValue() != 0) {
                     //画虚体矩形
-                    if(barEntities.get(i).isDrawDash()){
+                    if (barEntities.get(i).isDrawDash()) {
                         drawDashBarRect(canvas, rect, i, step, bottom, value);
-                    }else {
-                        paint.setColor(mColor);
+                    } else {
+                        topTextPaint.setColor(mColor);
                         //实体矩形
                         drawFillBarRect(canvas, rect, i, step, bottom, value);
                     }
@@ -261,8 +265,10 @@ public class BaseBarChart extends View {
             }
         }
     }
+
     /**
      * 画虚体柱状图
+     *
      * @param canvas
      * @param rect
      * @param index
@@ -270,66 +276,108 @@ public class BaseBarChart extends View {
      * @param bottom
      * @param value
      */
-    private void drawDashBarRect(Canvas canvas, Rect rect, int index, int step, int bottom, float value){
+    private void drawDashBarRect(Canvas canvas, Rect rect, int index, int step, int bottom, float value) {
         if (value >= 0) {//大于0
             float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
 
             rect.top = Math.round(rh);
             rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
 
-            //北京白色矩形
-            paint.setColor(Color.WHITE);
-            canvas.drawRect(rect, paint);
+            int width = rect.right - rect.left;
+            int height = rect.bottom - rect.top;
+
+            //背景白色矩形
+            topTextPaint.setColor(Color.WHITE);
+            canvas.drawRect(rect, topTextPaint);
 
             mRenderPaintDash.setColor(mColor);
 
             float startX = rect.left;
             float startY = rect.top;
             float stopX = rect.right;
+            float stopY = rect.bottom;
 
-            /**
-             * 右上角
-             */
-            float rightStartX = stopX - 10;
-            float rightStartY = startY + 10;
-            while (rightStartX > startX) {
-                canvas.drawLine(rightStartX, startY, stopX, rightStartY, mRenderPaintDash);
-                rightStartX -= 10;
-                rightStartY += 10;
+            int tempheightDiff = 10;
+            if (height < 10) {
+                tempheightDiff = 2;
             }
 
-            /**
-             * 中间
-             */
-            float endY = rightStartY;
-            startY += 10 / 2;
+            if (height > width) {
 
-            float middelStartY = startY;
-            while (endY < rect.bottom) {
-                canvas.drawLine(startX, middelStartY, stopX, endY, mRenderPaintDash);
-                middelStartY += 10;
-                endY += 10;
+                /**
+                 * 右上角
+                 */
+                float rightStartX = stopX - tempheightDiff;
+                float rightStartY = startY + tempheightDiff;
+                while (rightStartX > startX) {
+                    canvas.drawLine(rightStartX, startY, stopX, rightStartY, mRenderPaintDash);
+                    rightStartX -= tempheightDiff;
+                    rightStartY += tempheightDiff;
+                }
+
+                /**
+                 * 中间
+                 */
+                float endY = rightStartY;
+                startY += tempheightDiff / 2;
+
+                float middelStartY = startY;
+                while (endY < rect.bottom) {
+                    canvas.drawLine(startX, middelStartY, stopX, endY, mRenderPaintDash);
+                    middelStartY += tempheightDiff;
+                    endY += tempheightDiff;
+                }
+
+                /**
+                 * 左下角
+                 */
+                float leftStartX = startX;
+                float leftStartY = middelStartY;
+                float leftStopX = rect.right - tempheightDiff / 2;
+
+                while (leftStartY < rect.bottom) {
+                    canvas.drawLine(leftStartX, leftStartY, leftStopX, rect.bottom, mRenderPaintDash);
+                    leftStartY += tempheightDiff;
+                    leftStopX -= tempheightDiff;
+                }
+            } else if (height <= width) {
+
+                /**
+                 * 右上角
+                 */
+                float rightStartX = stopX - tempheightDiff;
+                float rightStartY = startY + tempheightDiff;
+                while (rightStartX > startX) {
+                    if (rightStartY > stopY) {
+                        rightStartY = stopY;
+                    }
+                    canvas.drawLine(rightStartX, startY, stopX, rightStartY, mRenderPaintDash);
+                    rightStartX -= tempheightDiff;
+                    rightStartY += tempheightDiff;
+                }
+
+
+                /**
+                 * 左下角
+                 */
+                float leftStartX = startX;
+                float leftStartY = startY + tempheightDiff / 2;
+                float leftStopX = rect.right - tempheightDiff / 2;
+
+                while (leftStartY < rect.bottom) {
+                    canvas.drawLine(leftStartX, leftStartY, leftStopX, rect.bottom, mRenderPaintDash);
+                    leftStartY += tempheightDiff;
+                    leftStopX -= tempheightDiff;
+                }
             }
 
-            /**
-             * 左下角
-             */
-            float leftStartX = startX;
-            float leftStartY = middelStartY;
-            float leftStopX = rect.right -10/2;
-
-            while (leftStartY < rect.bottom) {
-                canvas.drawLine(leftStartX, leftStartY, leftStopX, rect.bottom, mRenderPaintDash);
-                leftStartY += 10;
-                leftStopX-=10;
-            }
 
             // 显示柱状图上方的数字
             if (mDrawTextAtTop) {
                 int left = Utils.dp2px(xLeftLineOffset) + step * index + barMargin * index + step / 2;
 
-                canvas.drawText(value + "", left, rh - Utils.dp2px(30)
-                        + Utils.dp2px(xLabelHeight), paint);
+                canvas.drawText(value + "", left, rh - Utils.dp2px(60)
+                        + Utils.dp2px(xLabelHeight), topTextPaint);
             }
         } else if (value < 0) {
             float rbottom = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
@@ -337,7 +385,7 @@ public class BaseBarChart extends View {
             rect.top = bottom + Utils.dp2px(yRender.getyLineOffset());
             rect.bottom = Math.round(rbottom);
 
-            canvas.drawRect(rect, paint);
+            canvas.drawRect(rect, topTextPaint);
 
         }
 
@@ -349,6 +397,7 @@ public class BaseBarChart extends View {
 
     /**
      * 画实体柱状图
+     *
      * @param canvas
      * @param rect
      * @param index
@@ -356,20 +405,20 @@ public class BaseBarChart extends View {
      * @param bottom
      * @param value
      */
-    private void drawFillBarRect(Canvas canvas, Rect rect, int index, int step, int bottom, float value){
+    private void drawFillBarRect(Canvas canvas, Rect rect, int index, int step, int bottom, float value) {
         if (value >= 0) {//大于0
             float rh = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
 
             rect.top = Math.round(rh);
             rect.bottom = bottom + Utils.dp2px(yRender.getyLineOffset());
 
-            canvas.drawRect(rect, paint);
+            canvas.drawRect(rect, topTextPaint);
             // 显示柱状图上方的数字
             if (mDrawTextAtTop) {
                 int left = Utils.dp2px(xLeftLineOffset) + step * index + barMargin * index + step / 2;
 
                 canvas.drawText(value + "", left, rh - Utils.dp2px(30)
-                        + Utils.dp2px(xLabelHeight), paint);
+                        + Utils.dp2px(xLabelHeight), topTextPaint);
             }
         } else if (value < 0) {
             float rbottom = bottom + Utils.dp2px(yRender.getyLineOffset()) - value * yRender.gethPerHeight() / yRender.getvPerValue();
@@ -377,7 +426,7 @@ public class BaseBarChart extends View {
             rect.top = bottom + Utils.dp2px(yRender.getyLineOffset());
             rect.bottom = Math.round(rbottom);
 
-            canvas.drawRect(rect, paint);
+            canvas.drawRect(rect, topTextPaint);
         }
         canvas.drawRect(rect.left, rect.top, rect.right,
                 rect.bottom, mBarBorderPaint);
@@ -576,7 +625,7 @@ public class BaseBarChart extends View {
         }
         targetIndex++;
         //计算targetIndex的x轴位置
-        int targetBarX = getBarWidth() * targetIndex + getBarMargin() * targetIndex + getxLeftOffset() + getBarWidth() / 2;
+        int targetBarX = getBarWidth() * targetIndex + getBarMargin() * targetIndex + getxLeftOffset();
         return targetBarX;
     }
 

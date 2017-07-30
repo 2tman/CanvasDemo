@@ -47,9 +47,6 @@ public class BarChart extends FrameLayout {
         return yRender;
     }
 
-    public void animShow() {
-        baseBarChart.start(2);
-    }
 
     @Override
     protected void onFinishInflate() {

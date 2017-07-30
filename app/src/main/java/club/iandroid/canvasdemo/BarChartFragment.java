@@ -48,16 +48,16 @@ public class BarChartFragment extends Fragment {
         btn_go = (Button) view.findViewById(R.id.btn_go);
 
         mBarChart = (ComboChart) view.findViewById(R.id.mBarChart);
-        initData(mBarChart.getyRender());
-        addEvent();
+        initDataCombo(mBarChart.getyRender());
+        addCombEvent();
     }
 
-    public void initData(YRender yRender) {
+    public void initDataCombo(YRender yRender) {
         yRender.setMinValue(-1000);
         yRender.setMaxValue(5000);
         yRender.generateValues();
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 30; i++) {
             String label = "label-" + i;
             xLables.add(label);
             float randIndex = (float) i * 0.6f;
@@ -106,11 +106,11 @@ public class BarChartFragment extends Fragment {
     public void onResume() {
         super.onResume();
         if (isVisible()) {
-            mBarChart.getBaseBarChart().animShow(2);
+            mBarChart.animShow();
         }
     }
 
-    private void addEvent() {
+    private void addCombEvent() {
         mBarChart.setOnDragListener(new ComboChart.OnDragListener() {
             @Override
             public void onDragToLeft(int position) {

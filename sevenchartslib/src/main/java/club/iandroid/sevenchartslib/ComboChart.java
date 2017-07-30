@@ -48,7 +48,8 @@ public class ComboChart extends FrameLayout {
     }
 
     public void animShow() {
-        baseBarChart.start(2);
+        maxRightWidth = baseBarChart.getTotalBarWidth() - baseBarChart.getBarMargin();
+        baseBarChart.animShow(1);
     }
 
     @Override
@@ -65,7 +66,7 @@ public class ComboChart extends FrameLayout {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
-        maxRightWidth = baseBarChart.getTotalBarWidth() - baseBarChart.getViewWidth();
+        maxRightWidth = baseBarChart.getTotalBarWidth();
     }
 
     /****************************************************************
@@ -180,40 +181,45 @@ public class ComboChart extends FrameLayout {
                 public void onViewReleased(View releasedChild, float xvel, float yvel) {
                     super.onViewReleased(releasedChild, xvel, yvel);
                     if (isLeftLimit) {//到了最左边
-                        mViewDragHelper.smoothSlideViewTo(baseBarChart, 0, 0);
-                        ViewCompat.postInvalidateOnAnimation(ComboChart.this);
+//                        mViewDragHelper.smoothSlideViewTo(baseBarChart, 0, 0);
+//                        ViewCompat.postInvalidateOnAnimation(ComboChart.this);
                         if (onDragListener != null) {
                             onDragListener.onDragToLeft(0);
                         }
                     } else if (isRightLimit) {//到了最右边
-                        mViewDragHelper.smoothSlideViewTo(baseBarChart, -maxRightWidth + baseBarChart.getxLeftOffset() / 2, 0);
-                        ViewCompat.postInvalidateOnAnimation(ComboChart.this);
+//                        mViewDragHelper.smoothSlideViewTo(baseBarChart, -maxRightWidth, 0);
+//                        ViewCompat.postInvalidateOnAnimation(ComboChart.this);
                         if (onDragListener != null) {
                             onDragListener.onDragToRight(0);
                         }
-                    } else {
-                        int index = 0;
-                        if (Math.abs(baseBarChart.getLeft()) < (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()) / 2) {
-                            // 0号
-                            index = 0;
-                        } else {
-                            // 其余的
-                            index = Math.abs(
-                                    Math.round(
-                                            (baseBarChart.getLeft() -
-                                                    (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()) / 2
-                                            ) / (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()))
-                            );
-                        }
-                        LogUtils.log("targetIndex:" + index);
-                        if (mViewDragHelper.smoothSlideViewTo(baseBarChart,
-                                -index * (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()),
-                                0)) {
-                            // 返回true， 说明还没有移动到指定位置。需要重绘界面
-                            ViewCompat
-                                    .postInvalidateOnAnimation(ComboChart.this);
-                        }
                     }
+
+                    int index = 0;
+                    if (Math.abs(baseBarChart.getLeft()) < (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()) / 2) {
+                        // 0号
+                        index = 0;
+                    } else {
+                        // 其余的
+                        index = Math.abs(
+                                Math.round(
+                                        (baseBarChart.getLeft() -
+                                                (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()) / 2
+                                        ) / (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()))
+                        );
+                    }
+                    if (index > (baseBarChart.getBarEntities().size() - 1 - 2)) {
+                        index = baseBarChart.getBarEntities().size() - 1 - 2;
+                    }
+
+                    LogUtils.log("targetIndex:" + index);
+                    if (mViewDragHelper.smoothSlideViewTo(baseBarChart,
+                            -index * (baseBarChart.getBarWidth() + baseBarChart.getBarMargin()),
+                            0)) {
+                        // 返回true， 说明还没有移动到指定位置。需要重绘界面
+                        ViewCompat
+                                .postInvalidateOnAnimation(ComboChart.this);
+                    }
+
                 }
             };
 
