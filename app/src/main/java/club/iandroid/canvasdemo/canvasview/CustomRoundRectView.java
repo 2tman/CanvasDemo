@@ -56,11 +56,13 @@ public class CustomRoundRectView extends View {
         paint.setTextSize(12);//设置文字大小
 //        paint.setAntiAlias(true);//设置抗锯齿开关
 
-
+        canvas.drawRoundRect(new RectF(100, 100, 500, 300), 20, 20, paint);
         /**
          * 绘制圆角矩形
+         * left, top, right, bottom 是四条边的坐标，rx 和 ry 是圆角的横向半径和纵向半径。
          */
 //        canvas.drawRoundRect(100, 100, 500, 300, 50, 50, paint);
-        canvas.drawRoundRect(new RectF(100, 100, 500, 300), 20, 20, paint);
+        paint.setStyle(Paint.Style.FILL);//设置绘制模式 实心 填充模式
+        canvas.drawRoundRect(new RectF(100, 400, 500, 600), 20, 20, paint);
     }
 }

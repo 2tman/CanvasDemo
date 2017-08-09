@@ -20,7 +20,9 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import club.iandroid.canvasdemo.fragments.CanvasArcFragment;
 import club.iandroid.canvasdemo.fragments.CanvasCircleFragment;
+import club.iandroid.canvasdemo.fragments.CanvasDrawPathFragment;
 import club.iandroid.canvasdemo.fragments.CanvasLineFragment;
 import club.iandroid.canvasdemo.fragments.CanvasOvalFragment;
 import club.iandroid.canvasdemo.fragments.CanvasPointFragment;
@@ -72,13 +74,15 @@ public class CanvasBasicActivity extends AppCompatActivity {
 
     private void initDatas(){
         mTitles.clear();
-        mTitles.add("drawCircle");
-        mTitles.add("drawRect");
-        mTitles.add("drawLine");
-        mTitles.add("drawPoint");
+        mTitles.add("drawCircle画圆形");
+        mTitles.add("drawRect画矩形");
+        mTitles.add("drawLine画线");
+        mTitles.add("drawPoint画点");
 
-        mTitles.add("drawRoundRect");
-        mTitles.add("drawOval");
+        mTitles.add("drawRoundRect圆角矩形");
+        mTitles.add("drawOval椭圆");
+        mTitles.add("drawArc圆弧");
+        mTitles.add("drawPath绘制图形");
 
         //画圆形
         fragmentList.add(new CanvasCircleFragment());
@@ -93,6 +97,10 @@ public class CanvasBasicActivity extends AppCompatActivity {
         fragmentList.add(new CanvasRoundRectFragment());
         //画椭圆
         fragmentList.add(new CanvasOvalFragment());
+        //画弧
+        fragmentList.add(new CanvasArcFragment());
+        //绘制图形
+        fragmentList.add(new CanvasDrawPathFragment());
     }
 
     private void addEvent(){
