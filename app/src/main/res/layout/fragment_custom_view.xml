@@ -1,0 +1,20 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="club.iandroid.canvasdemo.CustomViewFragment">
+
+ <club.iandroid.canvasdemo.canvasview.CustomCircleView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+   <club.iandroid.canvasdemo.canvasview.CustomePointView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <club.iandroid.canvasdemo.canvasview.CustomOvalView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <club.iandroid.canvasdemo.canvasview.CustomLineView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</FrameLayout>
