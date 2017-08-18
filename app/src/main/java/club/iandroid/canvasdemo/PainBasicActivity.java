@@ -1,21 +1,15 @@
 package club.iandroid.canvasdemo;
 
 import android.support.design.widget.TabLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
-
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,17 +23,11 @@ import club.iandroid.canvasdemo.fragments.CanvasPathFillTypeFragment;
 import club.iandroid.canvasdemo.fragments.CanvasPointFragment;
 import club.iandroid.canvasdemo.fragments.CanvasRectFragment;
 import club.iandroid.canvasdemo.fragments.CanvasRoundRectFragment;
+import club.iandroid.canvasdemo.paints.PaintColorFragment;
 
-public class CanvasBasicActivity extends AppCompatActivity {
+public class PainBasicActivity extends AppCompatActivity {
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
+
     private SectionsPagerAdapter mSectionsPagerAdapter;
 
     /**
@@ -55,8 +43,7 @@ public class CanvasBasicActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_canvas_basic);
-
+        setContentView(R.layout.activity_pain_basic);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
@@ -75,36 +62,10 @@ public class CanvasBasicActivity extends AppCompatActivity {
 
     private void initDatas(){
         mTitles.clear();
-        mTitles.add("drawCircle画圆形");
-        mTitles.add("drawRect画矩形");
-        mTitles.add("drawLine画线");
-        mTitles.add("drawPoint画点");
-
-        mTitles.add("drawRoundRect圆角矩形");
-        mTitles.add("drawOval椭圆");
-        mTitles.add("drawArc圆弧");
-        mTitles.add("drawPath绘制图形");
-        mTitles.add("drawPath fillType");
+        mTitles.add("paint 设置颜色");
 
         //画圆形
-        fragmentList.add(new CanvasCircleFragment());
-        //画矩形
-        fragmentList.add(new CanvasRectFragment());
-        //画线
-        fragmentList.add(new CanvasLineFragment());
-        //画圆点
-        fragmentList.add(new CanvasPointFragment());
-
-        //画圆角矩形
-        fragmentList.add(new CanvasRoundRectFragment());
-        //画椭圆
-        fragmentList.add(new CanvasOvalFragment());
-        //画弧
-        fragmentList.add(new CanvasArcFragment());
-        //绘制图形
-        fragmentList.add(new CanvasDrawPathFragment());
-        //canvas filltype
-        fragmentList.add(new CanvasPathFillTypeFragment());
+        fragmentList.add(new PaintColorFragment());
     }
 
     private void addEvent(){

@@ -23,6 +23,10 @@
         <activity
             android:name=".CanvasBasicActivity"
             android:label="@string/title_activity_canvas_basic"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".PainBasicActivity"
+            android:label="@string/title_activity_canvas_basic"
             android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 

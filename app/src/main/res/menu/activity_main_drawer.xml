@@ -31,6 +31,10 @@
                 android:id="@+id/nav_cust"
                 android:icon="@drawable/ic_menu_slideshow"
                 android:title="canvas基础" />
+            <item
+                android:id="@+id/nav_paint"
+                android:icon="@drawable/ic_menu_slideshow"
+                android:title="Paint基础" />
         </menu>
     </item>
 

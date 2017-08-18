@@ -93,9 +93,11 @@ public class MainActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_bar_bar) {//复合柱状图
 
-        }else if(id == R.id.nav_cust){//自定义View
+        } else if (id == R.id.nav_cust) {//自定义View
 //            replactFragment(new CustomViewFragment());
             startActivity(new Intent(MainActivity.this, CanvasBasicActivity.class));
+        } else if (id == R.id.nav_paint) {//paint自定义
+            startActivity(new Intent(MainActivity.this, PainBasicActivity.class));
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
